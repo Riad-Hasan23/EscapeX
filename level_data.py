@@ -61,8 +61,8 @@ def generate_level_grid(level_idx: int):
     g[10][10] = EMPTY
 
     # 3. Add loops (knock down random walls)
-    # Lower levels have more loops (easier). Higher levels have fewer loops (harder).
-    loops = max(5, 30 - level_idx * 5)
+    # Lower levels have some loops. Higher levels have almost none (harder).
+    loops = max(2, 20 - level_idx * 5)
     attempts = 200
     while loops > 0 and attempts > 0:
         attempts -= 1

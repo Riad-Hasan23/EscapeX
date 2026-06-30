@@ -47,22 +47,30 @@ def _draw_cell(surf, r, c, cell_type, is_traversed, time_ms):
     rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
 
     if cell_type == WALL:
+        # Wood plank texture
         pygame.draw.rect(surf, C_WALL, rect)
-        # Highlight top & left edges for a 3-D bevel look
-        pygame.draw.line(surf, C_WALL_EDGE, (x, y), (x + CELL_SIZE - 1, y), 2)
-        pygame.draw.line(surf, C_WALL_EDGE, (x, y), (x, y + CELL_SIZE - 1), 2)
-        pygame.draw.line(surf, C_WALL_INNER, (x + CELL_SIZE - 1, y),
-                         (x + CELL_SIZE - 1, y + CELL_SIZE - 1), 1)
-        pygame.draw.line(surf, C_WALL_INNER, (x, y + CELL_SIZE - 1),
-                         (x + CELL_SIZE - 1, y + CELL_SIZE - 1), 1)
+        pygame.draw.rect(surf, C_WALL_EDGE, rect, 2)
+        pygame.draw.line(surf, C_WALL_INNER, (x + 5, y + 5), (x + 5, y + CELL_SIZE - 5), 2)
+        pygame.draw.line(surf, C_WALL_INNER, (x + CELL_SIZE - 5, y + 5), (x + CELL_SIZE - 5, y + CELL_SIZE - 5), 2)
+        pygame.draw.line(surf, C_WALL_INNER, (x + 10, y + CELL_SIZE // 2), (x + 20, y + CELL_SIZE // 2), 1)
         return
 
     bg = C_TRAVERSED if is_traversed else C_EMPTY
     pygame.draw.rect(surf, bg, rect)
+    
+    # Subtle parchment map circles
+    if not is_traversed:
+        pygame.draw.circle(surf, (25, 20, 15), (x + CELL_SIZE//2, y + CELL_SIZE//2), CELL_SIZE//2 - 2, 1)
 
     if cell_type == EMPTY and not is_traversed:
         cx, cy = x + CELL_SIZE // 2, y + CELL_SIZE // 2
-        pygame.draw.circle(surf, C_DOT, (cx, cy), 2)
+        # Glowing gold coin
+        pulse = 1 + int(2 * abs(math.sin(time_ms / 200 + r + c)))
+        s = pygame.Surface((10 + pulse*2, 10 + pulse*2), pygame.SRCALPHA)
+        pygame.draw.circle(s, (255, 200, 0, 80), (5 + pulse, 5 + pulse), 3 + pulse)
+        surf.blit(s, (cx - 5 - pulse, cy - 5 - pulse))
+        pygame.draw.circle(surf, C_DOT, (cx, cy), 3)
+        pygame.draw.circle(surf, (255, 255, 200), (cx - 1, cy - 1), 1) # Coin shine
 
 def _draw_item(surf, r, c, item_type, time_ms):
     x = c * CELL_SIZE
@@ -157,14 +165,68 @@ def _draw_player(surf, player: Player, time_ms: int):
         pygame.draw.circle(s, (*C_FIRE_BORDER, 100), (r + pulse, r + pulse), r + pulse)
         surf.blit(s, (px - r - pulse, py - r - pulse))
 
-    # Body circle
-    pygame.draw.circle(surf, body_col, (px, py), r)
-    pygame.draw.circle(surf, outline_col, (px, py), r, 2)
-
-    # Draw 'X' label
-    f = _font(int(CELL_SIZE * 0.55), bold=True)
-    lbl = f.render('X', True, (10, 10, 30) if body_col == C_PLAYER else (230, 240, 255))
-    surf.blit(lbl, lbl.get_rect(center=(px, py)))
+    # --- CHANGED: Jack Sparrow Pirate ---
+    is_moving = player.moving
+    swing = math.sin(time_ms / 100) * 8 if is_moving else 0
+    
+    # Create temporary surface
+    s = pygame.Surface((CELL_SIZE, CELL_SIZE), pygame.SRCALPHA)
+    cx, cy = CELL_SIZE // 2, CELL_SIZE // 2
+    
+    # Body (Brown Trench Coat)
+    body_y = cy - 2 + abs(swing) * 0.3
+    pygame.draw.rect(s, (80, 50, 30), (cx - 6, body_y, 12, 10), border_radius=2)
+    # Belt (Red sash)
+    pygame.draw.rect(s, (150, 30, 30), (cx - 6, body_y + 8, 12, 3))
+    
+    # Legs (Brown pants/boots)
+    leg_l = body_y + 11 + swing
+    leg_r = body_y + 11 - swing
+    pygame.draw.line(s, (50, 40, 30), (cx - 3, body_y + 10), (cx - 3, leg_l), 4)
+    pygame.draw.line(s, (50, 40, 30), (cx + 3, body_y + 10), (cx + 3, leg_r), 4)
+    
+    # Arms (White shirt / Brown coat sleeves)
+    pygame.draw.line(s, (80, 50, 30), (cx - 6, body_y + 2), (cx - 8, body_y + 6 - swing), 3)
+    # Right arm holding a sword
+    sword_y = body_y + 6 + swing
+    pygame.draw.line(s, (80, 50, 30), (cx + 6, body_y + 2), (cx + 8, sword_y), 3)
+    # Sword
+    pygame.draw.line(s, (200, 200, 200), (cx + 8, sword_y), (cx + 8, sword_y - 8), 2)
+    pygame.draw.line(s, (255, 215, 0), (cx + 6, sword_y), (cx + 10, sword_y), 2) # hilt
+    
+    # Head
+    pygame.draw.circle(s, (220, 180, 140), (cx, body_y - 4), 5)
+    
+    # Dreads (Black/Dark brown lines)
+    pygame.draw.line(s, (30, 20, 10), (cx - 4, body_y - 4), (cx - 6, body_y + 2), 2)
+    pygame.draw.line(s, (30, 20, 10), (cx + 4, body_y - 4), (cx + 6, body_y + 2), 2)
+    
+    # Red Bandana
+    pygame.draw.line(s, (180, 30, 30), (cx - 5, body_y - 6), (cx + 5, body_y - 6), 3)
+    
+    # Tricorne Hat
+    pts = [(cx - 8, body_y - 5), (cx + 8, body_y - 5), (cx, body_y - 12)]
+    pygame.draw.polygon(s, (40, 30, 20), pts)
+    
+    # Rotate surface based on direction
+    dc, dr = player.curr_dir
+    angle = 0
+    if dr == -1: angle = 0
+    elif dr == 1: angle = 180
+    elif dc == -1: angle = 90
+    elif dc == 1: angle = -90
+    
+    rotated = pygame.transform.rotate(s, angle)
+    rect = rotated.get_rect(center=(px, py))
+    surf.blit(rotated, rect.topleft)
+    
+    # Effects (Frozen/Fire/Tar/Speed)
+    if player.frozen:
+        pygame.draw.circle(surf, C_FROST_BORDER, (px, py), r + 2, 2)
+    elif eff == 'fire':
+        pygame.draw.circle(surf, C_FIRE_BORDER, (px, py), r + 2, 2)
+    elif eff == 'tar':
+        pygame.draw.circle(surf, C_TAR_BORDER, (px, py), r + 2, 2)
 
 
 def _draw_monster(surf, monster: Monster, time_ms: int):
@@ -184,23 +246,48 @@ def _draw_monster(surf, monster: Monster, time_ms: int):
 
     top = py - r
 
-    # Ghost body = semicircle cap + rectangle torso
-    body_rect = pygame.Rect(px - r, top + r, r * 2, r)
-    pygame.draw.circle(surf, colour, (px, top + r), r)  # dome
-    pygame.draw.rect(surf, colour, body_rect)
+    # --- CHANGED: POTC Monsters ---
+    bob = math.sin(time_ms / 150 + monster.idx) * 3
+    my = py + bob
+    
+    if monster.idx % 4 == 0:
+        # Skeleton Pirate
+        pygame.draw.circle(surf, (220, 220, 220), (px, my), r)
+        pygame.draw.circle(surf, (20, 20, 20), (px - 3, my - 2), 2)
+        pygame.draw.circle(surf, (20, 20, 20), (px + 3, my - 2), 2)
+        pygame.draw.rect(surf, (220, 220, 220), (px - 4, my + r - 4, 8, 4))
+        pygame.draw.line(surf, (50, 50, 50), (px - 2, my + r - 4), (px - 2, my + r))
+        pygame.draw.line(surf, (50, 50, 50), (px + 2, my + r - 4), (px + 2, my + r))
+        pygame.draw.line(surf, (200, 50, 50), (px - r, my - r + 3), (px + r, my - r + 3), 4)
 
-    # Wavy bottom — 3 bumps carved out
-    bump_r = r // 3
-    for i in range(3):
-        bx = px - r + bump_r + i * bump_r * 2
-        by = py + r
-        pygame.draw.circle(surf, C_BG, (bx, by), bump_r)
+    elif monster.idx % 4 == 1:
+        # Davy Jones (Octopus face)
+        pygame.draw.circle(surf, (60, 150, 120), (px, my), r)
+        for tx in [-4, -1, 2, 5]:
+            twiggle = math.sin(time_ms / 100 + tx) * 2
+            pygame.draw.line(surf, (40, 130, 100), (px + tx, my), (px + tx + twiggle, my + r + 4), 2)
+        pygame.draw.circle(surf, (255, 255, 0), (px - 4, my - 2), 2)
+        pygame.draw.circle(surf, (255, 255, 0), (px + 4, my - 2), 2)
 
-    # Eyes (white + pupil)
-    eye_y = top + r - 1
-    for ex in [px - r // 2, px + r // 2]:
-        pygame.draw.circle(surf, (240, 240, 255), (ex, eye_y), r // 4)
-        pygame.draw.circle(surf, (20, 30, 160),   (ex, eye_y), r // 7)
+    elif monster.idx % 4 == 2:
+        # Ghost Pirate
+        pulse_alpha = 100 + int(50 * math.sin(time_ms / 100))
+        s = pygame.Surface((r*2, r*2), pygame.SRCALPHA)
+        pygame.draw.circle(s, (100, 200, 255, pulse_alpha), (r, r), r)
+        pygame.draw.circle(s, (50, 100, 255, pulse_alpha), (r, r), r, 2)
+        pygame.draw.circle(s, (0, 0, 0, 150), (r - 4, r - 2), 3)
+        pygame.draw.circle(s, (0, 0, 0, 150), (r + 4, r - 2), 3)
+        pygame.draw.rect(s, (50, 70, 100, pulse_alpha), (r - 10, r - 10, 20, 6))
+        surf.blit(s, (px - r, my - r))
+
+    else:
+        # Kraken Tentacle
+        pygame.draw.ellipse(surf, (20, 10, 30), (px - r, my + r - 4, r*2, 6))
+        twiggle = math.sin(time_ms / 80) * 4
+        pts = [(px - 6, my + r), (px - 2 + twiggle, my - r), (px + 2 + twiggle, my - r), (px + 6, my + r)]
+        pygame.draw.polygon(surf, (150, 50, 150), pts)
+        pygame.draw.circle(surf, (200, 100, 200), (px - 3 + int(twiggle*0.5), my), 2)
+        pygame.draw.circle(surf, (200, 100, 200), (px - 4 + int(twiggle*0.8), my - 6), 2)
 
 
 # ── Sidebar rendering ─────────────────────────────────────────────────────────
@@ -379,6 +466,21 @@ class GameManager:
         # Flash effect on death
         self._flash = 0.0
 
+        # Particle System
+        self.particles = []
+
+    def spawn_particles(self, x, y, col, count=10, speed=50):
+        for _ in range(count):
+            angle = random.uniform(0, math.pi * 2)
+            s = random.uniform(speed*0.5, speed)
+            self.particles.append({
+                'x': x, 'y': y,
+                'vx': math.cos(angle) * s, 'vy': math.sin(angle) * s,
+                'life': random.uniform(0.2, 0.6),
+                'max_life': 0.6,
+                'col': col, 'size': random.uniform(1, 3)
+            })
+
         # Audio
         self.sounds = {}
         try:
@@ -536,6 +638,8 @@ class GameManager:
                 entity.apply_effect(item['type'])
                 if entity == self.player:
                     self.play_sound('powerup')
+                    px, py = self.player.get_render_pos()
+                    self.spawn_particles(px, py, (255, 255, 0), count=15, speed=100)
 
         _check_item(self.player)
         for m in self.monsters:
@@ -547,6 +651,7 @@ class GameManager:
                 if self.player.effect == 'fire':
                     self.play_sound('kill')
                     self.score += SCORE_KILL_GHOST
+                    self.spawn_particles(m.px, m.py, MONSTER_COLORS[m.idx % len(MONSTER_COLORS)], count=20, speed=120)
                     idx = self.level - 1
                     mr, mc = MONSTER_STARTS[idx][m.idx]
                     m.respawn(mr, mc)
@@ -562,10 +667,24 @@ class GameManager:
         if self._flash > 0:
             self._flash = max(0.0, self._flash - dt * 3)
 
+        # ── Particles ─────────────────────────────────────────────────────────
+        for p in self.particles:
+            p['x'] += p['vx'] * dt
+            p['y'] += p['vy'] * dt
+            p['life'] -= dt
+        self.particles = [p for p in self.particles if p['life'] > 0]
+        
+        # Emit dust if player moving
+        if self.player.moving and random.random() < 0.2:
+            px, py = self.player.get_render_pos()
+            self.spawn_particles(px, py + CELL_SIZE//2, (150, 130, 100), count=1, speed=20)
+
     # ── State transitions ─────────────────────────────────────────────────────
     def _player_caught(self):
         self.lives -= 1
         self._flash = 1.0
+        px, py = self.player.get_render_pos()
+        self.spawn_particles(px, py, (255, 0, 0), count=30, speed=150)
         if self.lives <= 0:
             self.state = ST_GAMEOVER
             self.play_sound('game_over')
@@ -622,6 +741,14 @@ class GameManager:
 
         if self.player:
             _draw_player(self.screen, self.player, time_ms)
+
+        # ── Particles ─────────────────────────────────────────────────────────
+        for p in self.particles:
+            alpha = max(0, int((p['life'] / p['max_life']) * 255))
+            c = (*p['col'], alpha)
+            s = pygame.Surface((p['size']*2, p['size']*2), pygame.SRCALPHA)
+            pygame.draw.circle(s, c, (p['size'], p['size']), p['size'])
+            self.screen.blit(s, (int(p['x'] - p['size']), int(p['y'] - p['size'])))
 
         # ── Death flash overlay ───────────────────────────────────────────────
         if self._flash > 0:

@@ -23,19 +23,19 @@ FROST       = 5   # freezes entity
 FIRE        = 7   # allows player to kill ghosts
 TRAVERSED   = 6   # visual marker only (stored separately)
 
-# ── Colour palette (dark‑neon theme) ─────────────────────────────────────────
-C_BG              = (8,  8,  28)
-C_HEADER_BG       = (4,  4,  18)
-C_SIDEBAR_BG      = (4,  4,  18)
-C_SIDEBAR_LINE    = (25, 40, 110)
+# ── Colour palette (Classy Pirate Theme) ───────────────────────────────────────
+C_BG              = (15,  10,   5)
+C_HEADER_BG       = (10,   5,   2)
+C_SIDEBAR_BG      = (10,   5,   2)
+C_SIDEBAR_LINE    = (120, 80,  40)
 
-C_WALL            = (28,  68, 195)
-C_WALL_EDGE       = (55, 115, 240)
-C_WALL_INNER      = (18,  45, 130)
+C_WALL            = (60,  40,  20)
+C_WALL_EDGE       = (90,  60,  30)
+C_WALL_INNER      = (40,  25,  10)
 
-C_EMPTY           = (10,  10,  34)
-C_TRAVERSED       = (12,  42,  72)
-C_DOT             = (50,  55, 100)
+C_EMPTY           = (20,  15,  10)
+C_TRAVERSED       = (35,  25,  15)
+C_DOT             = (255, 215,  0)  # Gold coin
 
 C_TAR             = (90,  55,  18)
 C_TAR_BORDER      = (140, 90,  30)
@@ -84,14 +84,14 @@ FROST_DUR      = 2.5
 FIRE_DUR       = 6.0
 
 # Dynamic Item spawning
-ITEM_SPAWN_INTERVAL = 6.0
-ITEM_DESPAWN_TIME   = 12.0
+ITEM_SPAWN_INTERVAL = 10.0
+ITEM_DESPAWN_TIME   = 8.0
 MAX_ITEMS           = 2
 
 # Monster speeds per level (index 0 = level 1)
-MONSTER_SPEEDS  = [65, 74, 84, 95, 110]
+MONSTER_SPEEDS  = [80, 95, 115, 135, 160]
 # How often a monster recomputes its path (seconds)
-MONSTER_RECOMPUTE = 0.45
+MONSTER_RECOMPUTE = 0.25
 
 # ── Directions: (dcol, drow) tuples ──────────────────────────────────────────
 DIR_UP    = ( 0, -1)
@@ -119,10 +119,10 @@ ALGO_DISPLAY = {
 
 # Monster algorithm config per level (4 monsters)
 LEVEL_CONFIGS = [
-    [ALGO_RANDOM,   ALGO_RANDOM,   ALGO_RANDOM,   ALGO_RANDOM],
-    [ALGO_RANDOM,   ALGO_DFS,      ALGO_BFS,      ALGO_RANDOM],
-    [ALGO_DFS,      ALGO_BFS,      ALGO_BACKTRACK, ALGO_DIJKSTRA],
+    [ALGO_BFS,      ALGO_DFS,      ALGO_ASTAR,    ALGO_RANDOM],
     [ALGO_BFS,      ALGO_DIJKSTRA, ALGO_ASTAR,    ALGO_ASTAR],
+    [ALGO_DIJKSTRA, ALGO_ASTAR,    ALGO_ASTAR,    ALGO_ASTAR],
+    [ALGO_ASTAR,    ALGO_ASTAR,    ALGO_ASTAR,    ALGO_ASTAR],
     [ALGO_ASTAR,    ALGO_ASTAR,    ALGO_ASTAR,    ALGO_ASTAR],
 ]
 
