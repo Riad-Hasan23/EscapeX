@@ -32,7 +32,6 @@ def main():
         pass
     finally:
         pygame.quit()
-        sys.exit(0)
 
 
 if __name__ == '__main__':

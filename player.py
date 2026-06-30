@@ -4,10 +4,6 @@
 from entity import Entity
 from constants import (
     PLAYER_SPEED,
-    MUD, SLIPPER, INVISIBLE, FREEZE_CELL,
-    MUD_MULT, MUD_DUR,
-    SLIPPER_MULT, SLIPPER_DUR,
-    INVISIBLE_DUR, FREEZE_DUR,
     DIR_UP, DIR_DOWN, DIR_LEFT, DIR_RIGHT,
 )
 
@@ -89,5 +85,5 @@ class Player(Entity):
     # ── Effect info for UI ────────────────────────────────────────────────────
     def get_effect_info(self):
         if self.frozen:
-            return ('freeze', self.freeze_timer)
+            return ('frost', self.freeze_timer)
         return (self.effect, self.effect_timer)

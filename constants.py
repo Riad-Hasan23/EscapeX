@@ -4,9 +4,9 @@
 
 # ── Display ──────────────────────────────────────────────────────────────────
 CELL_SIZE      = 30          # pixels per grid cell
-GRID_COLS      = 20
-GRID_ROWS      = 20
-GAME_AREA_W    = CELL_SIZE * GRID_COLS   # 600
+GRID_COLS      = 21
+GRID_ROWS      = 21
+GAME_AREA_W    = CELL_SIZE * GRID_COLS   # 630
 SIDEBAR_W      = 230
 SCREEN_W       = GAME_AREA_W + SIDEBAR_W  # 830
 HEADER_H       = 58
@@ -16,10 +16,11 @@ FPS            = 60
 # ── Cell types ───────────────────────────────────────────────────────────────
 EMPTY       = 0
 WALL        = 1
-MUD         = 2   # slows entity
-SLIPPER     = 3   # speeds entity
-INVISIBLE   = 4   # makes player invisible to ghosts
-FREEZE_CELL = 5   # freezes entity
+TAR         = 2   # slows entity
+SPEED       = 3   # speeds entity
+STEALTH     = 4   # makes player invisible to ghosts
+FROST       = 5   # freezes entity
+FIRE        = 7   # allows player to kill ghosts
 TRAVERSED   = 6   # visual marker only (stored separately)
 
 # ── Colour palette (dark‑neon theme) ─────────────────────────────────────────
@@ -36,22 +37,25 @@ C_EMPTY           = (10,  10,  34)
 C_TRAVERSED       = (12,  42,  72)
 C_DOT             = (50,  55, 100)
 
-C_MUD             = (90,  55,  18)
-C_MUD_BORDER      = (140, 90,  30)
-C_SLIPPER         = (70, 165, 240)
-C_SLIPPER_BORDER  = (130, 210, 255)
-C_INVISIBLE       = (120, 120, 150)
-C_INVISIBLE_BORDER= (200, 200, 230)
-C_FREEZE          = (145, 205, 252)
-C_FREEZE_BORDER   = (200, 235, 255)
+C_TAR             = (90,  55,  18)
+C_TAR_BORDER      = (140, 90,  30)
+C_SPEED         = (70, 165, 240)
+C_SPEED_BORDER  = (130, 210, 255)
+C_STEALTH       = (120, 120, 150)
+C_STEALTH_BORDER= (200, 200, 230)
+C_FROST          = (145, 205, 252)
+C_FROST_BORDER   = (200, 235, 255)
+C_FIRE           = (240,  80,  40)
+C_FIRE_BORDER    = (255, 180,  50)
 
 C_PLAYER          = (255, 220,   0)
 C_PLAYER_OUTLINE  = (255, 155,   0)
-C_PLAYER_MUD      = (160, 100,  30)
-C_PLAYER_SLIPPER  = ( 70, 190, 255)
-C_PLAYER_INVISIBLE= ( 60,  60,  90)  # darker/transparent look
-C_PLAYER_FREEZE   = (190, 230, 255)
+C_PLAYER_TAR      = (160, 100,  30)
+C_PLAYER_SPEED  = ( 70, 190, 255)
+C_PLAYER_STEALTH= ( 60,  60,  90)  # darker/transparent look
+C_PLAYER_FROST   = (190, 230, 255)
 C_PLAYER_FROZEN   = (160, 210, 255)  # while freeze effect is active
+C_PLAYER_FIRE     = (255, 100,  20)
 
 MONSTER_COLORS = [
     (255,  55,  55),   # Rex   — Red
@@ -69,14 +73,15 @@ C_TEXT_RED       = (255,  70,  70)
 
 # ── Speed settings (pixels / second) ─────────────────────────────────────────
 PLAYER_SPEED    = 90    # baseline (~3 cells/sec at CELL_SIZE=30)
-MUD_MULT        = 0.35
-SLIPPER_MULT    = 2.2
+TAR_MULT        = 0.35
+SPEED_MULT    = 2.2
 
 # Effect durations (seconds)
-MUD_DUR         = 4.0
-SLIPPER_DUR     = 3.0
-INVISIBLE_DUR   = 5.0
-FREEZE_DUR      = 2.5   # user-requested freeze attribute
+TAR_DUR         = 4.0
+SPEED_DUR     = 3.0
+STEALTH_DUR   = 5.0
+FROST_DUR      = 2.5
+FIRE_DUR       = 6.0
 
 # Dynamic Item spawning
 ITEM_SPAWN_INTERVAL = 6.0
@@ -135,6 +140,7 @@ ST_WIN      = 'win'
 SCORE_STEP      = 10
 SCORE_LEVEL_WIN = 1000
 SCORE_LIFE_BONUS = 300
+SCORE_KILL_GHOST = 200
 LIVES           = 3
 
 # ── Alignment tolerance for direction buffering ───────────────────────────────

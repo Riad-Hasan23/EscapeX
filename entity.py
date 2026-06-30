@@ -38,7 +38,7 @@ class Entity:
         self.px, self.py = self._centre(start_row, start_col)
 
         # ── Shared effect state ───────────────────────────────────────────────
-        self.effect = None       # 'mud' | 'slipper' | 'invisible' | 'freeze' | None
+        self.effect = None       # 'tar' | 'speed' | 'stealth' | 'frost' | 'fire' | None
         self.effect_timer = 0.0
         self.frozen = False
         self.freeze_timer = 0.0
@@ -72,29 +72,33 @@ class Entity:
     # ── Effect management ─────────────────────────────────────────────────────
     def apply_effect(self, effect_type):
         """Called by the game manager when this entity consumes an item."""
-        from constants import (MUD, SLIPPER, INVISIBLE, FREEZE_CELL,
-                               MUD_MULT, SLIPPER_MULT,
-                               MUD_DUR, SLIPPER_DUR, INVISIBLE_DUR, FREEZE_DUR)
+        from constants import (TAR, SPEED, STEALTH, FROST, FIRE,
+                               TAR_MULT, SPEED_MULT,
+                               TAR_DUR, SPEED_DUR, STEALTH_DUR, FROST_DUR, FIRE_DUR)
         
-        if effect_type == MUD:
-            self.effect = 'mud'
-            self.effect_timer = MUD_DUR
-            self.speed = self.base_speed * MUD_MULT
-        elif effect_type == SLIPPER:
-            self.effect = 'slipper'
-            self.effect_timer = SLIPPER_DUR
-            self.speed = self.base_speed * SLIPPER_MULT
-        elif effect_type == INVISIBLE:
-            self.effect = 'invisible'
-            self.effect_timer = INVISIBLE_DUR
+        if effect_type == TAR:
+            self.effect = 'tar'
+            self.effect_timer = TAR_DUR
+            self.speed = self.base_speed * TAR_MULT
+        elif effect_type == SPEED:
+            self.effect = 'speed'
+            self.effect_timer = SPEED_DUR
+            self.speed = self.base_speed * SPEED_MULT
+        elif effect_type == STEALTH:
+            self.effect = 'stealth'
+            self.effect_timer = STEALTH_DUR
             self.invisible = True
             self.speed = self.base_speed
-        elif effect_type == FREEZE_CELL:
-            self.effect = 'freeze'
+        elif effect_type == FROST:
+            self.effect = 'frost'
             self.effect_timer = 0.0
             self.speed = self.base_speed
             self.frozen = True
-            self.freeze_timer = FREEZE_DUR
+            self.freeze_timer = FROST_DUR
+        elif effect_type == FIRE:
+            self.effect = 'fire'
+            self.effect_timer = FIRE_DUR
+            self.speed = self.base_speed
 
     def tick_effects(self, dt: float):
         """Update active effect timers. Returns True if frozen (cannot move)."""

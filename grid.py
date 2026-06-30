@@ -1,8 +1,8 @@
 # =============================================================================
 #  grid.py — Grid data-model for EscapeX
 # =============================================================================
-from constants import (WALL, EMPTY, MUD, SLIPPER, INVISIBLE, FREEZE_CELL,
-                       GRID_ROWS, GRID_COLS)
+from constants import (WALL, EMPTY,
+                       GRID_ROWS, GRID_COLS, TRAVERSED)
 
 
 class Grid:

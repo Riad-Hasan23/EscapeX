@@ -69,38 +69,45 @@ def _draw_item(surf, r, c, item_type, time_ms):
     y = HEADER_H + r * CELL_SIZE
     rect = pygame.Rect(x, y, CELL_SIZE, CELL_SIZE)
 
-    if item_type == MUD:
-        pygame.draw.rect(surf, C_MUD, rect)
-        pygame.draw.rect(surf, C_MUD_BORDER, rect, 2)
+    if item_type == TAR:
+        pygame.draw.rect(surf, C_TAR, rect)
+        pygame.draw.rect(surf, C_TAR_BORDER, rect, 2)
         for ox, oy in [(-5, -4), (4, 2), (-3, 5), (5, -5)]:
-            pygame.draw.circle(surf, C_MUD_BORDER,
+            pygame.draw.circle(surf, C_TAR_BORDER,
                                (x + CELL_SIZE//2 + ox, y + CELL_SIZE//2 + oy), 3)
 
-    elif item_type == SLIPPER:
-        pygame.draw.rect(surf, C_SLIPPER, rect)
-        pygame.draw.rect(surf, C_SLIPPER_BORDER, rect, 2)
+    elif item_type == SPEED:
+        pygame.draw.rect(surf, C_SPEED, rect)
+        pygame.draw.rect(surf, C_SPEED_BORDER, rect, 2)
         cx, cy = x + CELL_SIZE//2, y + CELL_SIZE//2
         pts = [(cx - 8, cy), (cx + 2, cy - 6), (cx + 2, cy - 2),
                (cx + 8, cy - 2), (cx + 8, cy + 2), (cx + 2, cy + 2), (cx + 2, cy + 6)]
-        pygame.draw.polygon(surf, C_SLIPPER_BORDER, pts)
+        pygame.draw.polygon(surf, C_SPEED_BORDER, pts)
 
-    elif item_type == INVISIBLE:
-        pygame.draw.rect(surf, C_INVISIBLE, rect)
-        pygame.draw.rect(surf, C_INVISIBLE_BORDER, rect, 2)
+    elif item_type == STEALTH:
+        pygame.draw.rect(surf, C_STEALTH, rect)
+        pygame.draw.rect(surf, C_STEALTH_BORDER, rect, 2)
         # Eye icon with a slash
         cx, cy = x + CELL_SIZE // 2, y + CELL_SIZE // 2
-        pygame.draw.ellipse(surf, C_INVISIBLE_BORDER, (cx - 8, cy - 4, 16, 8), 1)
-        pygame.draw.line(surf, C_INVISIBLE_BORDER, (cx - 8, cy - 6), (cx + 8, cy + 6), 2)
+        pygame.draw.ellipse(surf, C_STEALTH_BORDER, (cx - 8, cy - 4, 16, 8), 1)
+        pygame.draw.line(surf, C_STEALTH_BORDER, (cx - 8, cy - 6), (cx + 8, cy + 6), 2)
 
-    elif item_type == FREEZE_CELL:
-        pygame.draw.rect(surf, C_FREEZE, rect)
-        pygame.draw.rect(surf, C_FREEZE_BORDER, rect, 2)
+    elif item_type == FROST:
+        pygame.draw.rect(surf, C_FROST, rect)
+        pygame.draw.rect(surf, C_FROST_BORDER, rect, 2)
         cx, cy = x + CELL_SIZE // 2, y + CELL_SIZE // 2
         for angle in [0, 45, 90, 135]:
             rad = math.radians(angle)
             dx, dy = int(8 * math.cos(rad)), int(8 * math.sin(rad))
-            pygame.draw.line(surf, C_FREEZE_BORDER,
+            pygame.draw.line(surf, C_FROST_BORDER,
                              (cx - dx, cy - dy), (cx + dx, cy + dy), 2)
+                             
+    elif item_type == FIRE:
+        pygame.draw.rect(surf, C_FIRE, rect)
+        pygame.draw.rect(surf, C_FIRE_BORDER, rect, 2)
+        cx, cy = x + CELL_SIZE // 2, y + CELL_SIZE // 2
+        pts = [(cx, cy - 8), (cx + 6, cy + 2), (cx + 3, cy + 8), (cx - 3, cy + 8), (cx - 6, cy + 2)]
+        pygame.draw.polygon(surf, C_FIRE_BORDER, pts)
 
 
 # ── Player rendering ──────────────────────────────────────────────────────────
@@ -111,35 +118,43 @@ def _draw_player(surf, player: Player, time_ms: int):
     # Pick colour based on active effect
     eff, timer = player.get_effect_info()
     if player.frozen:
-        body_col   = C_PLAYER_FREEZE
-        outline_col = C_FREEZE_BORDER
-    elif eff == 'mud':
-        body_col   = C_PLAYER_MUD
-        outline_col = C_MUD_BORDER
-    elif eff == 'slipper':
+        body_col   = C_PLAYER_FROZEN
+        outline_col = C_FROST_BORDER
+    elif eff == 'tar':
+        body_col   = C_PLAYER_TAR
+        outline_col = C_TAR_BORDER
+    elif eff == 'speed':
         # Speed lines (blue trail)
-        body_col   = C_PLAYER_SLIPPER
-        outline_col = C_SLIPPER_BORDER
+        body_col   = C_PLAYER_SPEED
+        outline_col = C_SPEED_BORDER
         for i in range(1, 4):
             alpha = 180 - i * 45
             dc, dr = player.curr_dir
             tx = px - dc * i * 6
             ty = py - dr * i * 6
             s = pygame.Surface((r * 2, r * 2), pygame.SRCALPHA)
-            pygame.draw.circle(s, (*C_PLAYER_SLIPPER, alpha), (r, r), max(1, r - i * 2))
+            pygame.draw.circle(s, (*C_PLAYER_SPEED, alpha), (r, r), max(1, r - i * 2))
             surf.blit(s, (tx - r, ty - r))
-    elif eff == 'invisible':
-        body_col   = C_PLAYER_INVISIBLE
-        outline_col = C_INVISIBLE_BORDER
+    elif eff == 'stealth':
+        body_col   = C_PLAYER_STEALTH
+        outline_col = C_STEALTH_BORDER
+    elif eff == 'fire':
+        body_col   = C_PLAYER_FIRE
+        outline_col = C_FIRE_BORDER
     else:
         body_col   = C_PLAYER
         outline_col = C_PLAYER_OUTLINE
 
-    # Pulsing glow for freeze
+    # Pulsing glow for freeze and fire
     if player.frozen:
         pulse = 3 + int(2 * abs(math.sin(time_ms / 200)))
         s = pygame.Surface(((r + pulse) * 2, (r + pulse) * 2), pygame.SRCALPHA)
-        pygame.draw.circle(s, (*C_FREEZE_BORDER, 80), (r + pulse, r + pulse), r + pulse)
+        pygame.draw.circle(s, (*C_FROST_BORDER, 80), (r + pulse, r + pulse), r + pulse)
+        surf.blit(s, (px - r - pulse, py - r - pulse))
+    elif eff == 'fire':
+        pulse = 4 + int(3 * abs(math.sin(time_ms / 150)))
+        s = pygame.Surface(((r + pulse) * 2, (r + pulse) * 2), pygame.SRCALPHA)
+        pygame.draw.circle(s, (*C_FIRE_BORDER, 100), (r + pulse, r + pulse), r + pulse)
         surf.blit(s, (px - r - pulse, py - r - pulse))
 
     # Body circle
@@ -159,13 +174,13 @@ def _draw_monster(surf, monster: Monster, time_ms: int):
 
     # Draw effect indicators
     if monster.frozen:
-        colour = C_FREEZE_BORDER
-    elif monster.effect == 'mud':
-        colour = C_MUD_BORDER
-    elif monster.effect == 'slipper':
-        colour = C_SLIPPER_BORDER
-    elif monster.effect == 'invisible':
-        colour = C_INVISIBLE_BORDER
+        colour = C_FROST_BORDER
+    elif monster.effect == 'tar':
+        colour = C_TAR_BORDER
+    elif monster.effect == 'speed':
+        colour = C_SPEED_BORDER
+    elif monster.effect == 'stealth':
+        colour = C_STEALTH_BORDER
 
     top = py - r
 
@@ -239,16 +254,19 @@ def _draw_sidebar(surf, game, time_ms: int):
         eff, timer = game.player.get_effect_info()
         if game.player.frozen:
             eff_name = '❄  FROZEN'
-            col = C_FREEZE_BORDER
-        elif eff == 'mud':
-            eff_name = '⬛ MUD  (slow)'
-            col = C_MUD_BORDER
-        elif eff == 'slipper':
-            eff_name = '💨 SLIPPER (fast)'
-            col = C_SLIPPER_BORDER
-        elif eff == 'invisible':
-            eff_name = '👁 INVISIBLE (hidden)'
-            col = C_INVISIBLE_BORDER
+            col = C_FROST_BORDER
+        elif eff == 'tar':
+            eff_name = '⬛ TAR (slow)'
+            col = C_TAR_BORDER
+        elif eff == 'speed':
+            eff_name = '💨 SPEED (fast)'
+            col = C_SPEED_BORDER
+        elif eff == 'stealth':
+            eff_name = '👁 STEALTH (hidden)'
+            col = C_STEALTH_BORDER
+        elif eff == 'fire':
+            eff_name = '🔥 FIRE (kill ghosts)'
+            col = C_FIRE_BORDER
         else:
             eff_name = '— none —'
             col = C_TEXT_SECONDARY
@@ -257,9 +275,9 @@ def _draw_sidebar(surf, game, time_ms: int):
         y += 16
         if eff or game.player.frozen:
             bar_pct = (timer / {
-                'mud': MUD_DUR, 'slipper': SLIPPER_DUR,
-                'invisible': INVISIBLE_DUR, 'freeze': FREEZE_DUR
-            }.get(eff or 'freeze', 1)) * 100
+                'tar': TAR_DUR, 'speed': SPEED_DUR,
+                'stealth': STEALTH_DUR, 'fire': FIRE_DUR, 'frost': FROST_DUR
+            }.get(eff or 'frost', 1)) * 100
             _progress_bar(surf, pygame.Rect(x0 + 12, y, SIDEBAR_W - 24, 8),
                           bar_pct, fg=col)
         y += 16
@@ -302,7 +320,7 @@ def _draw_header(surf, game, time_ms):
     # Pulsing title
     pulse = 0.5 + 0.5 * math.sin(time_ms / 600)
     title_col = tuple(int(a + (b - a) * pulse) for a, b in
-                      zip(C_TEXT_GOLD, C_PLAYER_SLIPPER))
+                      zip(C_TEXT_GOLD, C_PLAYER_SPEED))
     _text(surf, 'ESCAPE X', 26, title_col, (20, HEADER_H // 2), bold=True, anchor='midleft')
 
     # Progress hint
@@ -370,6 +388,8 @@ class GameManager:
             self.sounds['powerup'].set_volume(0.5)
             self.sounds['caught'] = pygame.mixer.Sound('assets/sounds/caught.wav')
             self.sounds['caught'].set_volume(0.6)
+            self.sounds['kill'] = pygame.mixer.Sound('assets/sounds/kill.wav')
+            self.sounds['kill'].set_volume(0.6)
             self.sounds['win'] = pygame.mixer.Sound('assets/sounds/win.wav')
             self.sounds['win'].set_volume(0.6)
             self.sounds['game_over'] = pygame.mixer.Sound('assets/sounds/game_over.wav')
@@ -444,6 +464,11 @@ class GameManager:
         self.player = Player(pr, pc)
         self.grid.mark_traversed(pr, pc)
 
+        # Pre-mark the ghost house interior and exit as traversed (no dots)
+        for c in range(8, 13):
+            self.grid.mark_traversed(9, c)
+        self.grid.mark_traversed(10, 10)
+
         # Monsters
         algos = LEVEL_CONFIGS[idx]
         speed = MONSTER_SPEEDS[idx]
@@ -480,7 +505,7 @@ class GameManager:
                             empty_cells.append((r, c))
                 if empty_cells:
                     pos = random.choice(empty_cells)
-                    types = [MUD, SLIPPER, INVISIBLE, FREEZE_CELL]
+                    types = [TAR, SPEED, STEALTH, FROST, FIRE]
                     self.active_items[pos] = {'type': random.choice(types), 'timer': ITEM_DESPAWN_TIME}
         
         expired = []
@@ -504,6 +529,9 @@ class GameManager:
         def _check_item(entity):
             pos = entity.get_grid_pos()
             if pos in self.active_items:
+                item_type = self.active_items[pos]['type']
+                if entity != self.player and item_type == FIRE:
+                    return # Monsters cannot eat fire
                 item = self.active_items.pop(pos)
                 entity.apply_effect(item['type'])
                 if entity == self.player:
@@ -516,8 +544,15 @@ class GameManager:
         # ── Collision detection ───────────────────────────────────────────────
         for m in self.monsters:
             if self.player.collides_with(m):
-                self._player_caught()
-                return
+                if self.player.effect == 'fire':
+                    self.play_sound('kill')
+                    self.score += SCORE_KILL_GHOST
+                    idx = self.level - 1
+                    mr, mc = MONSTER_STARTS[idx][m.idx]
+                    m.respawn(mr, mc)
+                else:
+                    self._player_caught()
+                    return
 
         # ── Level complete check ──────────────────────────────────────────────
         if self.grid.is_complete():
@@ -630,7 +665,7 @@ class GameManager:
 
         # Title
         pulse = 0.5 + 0.5 * math.sin(time_ms / 500)
-        tc = tuple(int(a + (b - a) * pulse) for a, b in zip(C_TEXT_GOLD, C_PLAYER_SLIPPER))
+        tc = tuple(int(a + (b - a) * pulse) for a, b in zip(C_TEXT_GOLD, C_PLAYER_SPEED))
         _text(self.screen, 'ESCAPE X', 70, tc, (cx, cy - 110), bold=True, anchor='center')
         _text(self.screen, 'Cover every cell of the grid to escape!',
               18, C_TEXT_SECONDARY, (cx, cy - 50), anchor='center')
@@ -643,10 +678,11 @@ class GameManager:
         info = [
             ('🟡', 'X',       'You — cover ALL cells to win'),
             ('🔴', 'Monsters','Chase you with evolving AI'),
-            ('⬛', 'Mud',     f'Slows you for {MUD_DUR:.0f}s'),
-            ('👁', 'Invisible', f'Hidden from ghosts for {INVISIBLE_DUR:.0f}s'),
-            ('💨', 'Slipper', f'Speed boost for {SLIPPER_DUR:.0f}s'),
-            ('❄',  'Freeze',  f'Freezes you for {FREEZE_DUR:.0f}s'),
+            ('⬛', 'Tar',     f'Slows you for {TAR_DUR:.0f}s'),
+            ('👁', 'Stealth', f'Hidden from ghosts for {STEALTH_DUR:.0f}s'),
+            ('💨', 'Speed',   f'Speed boost for {SPEED_DUR:.0f}s'),
+            ('❄',  'Frost',   f'Freezes you for {FROST_DUR:.0f}s'),
+            ('🔥', 'Fire',    f'Kills ghosts for {FIRE_DUR:.0f}s!'),
         ]
         for i, (icon, name, desc) in enumerate(info):
             iy = cy - 10 + i * 26

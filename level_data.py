@@ -1,15 +1,15 @@
 # =============================================================================
 #  level_data.py — Five pre-designed 20×20 mazes for EscapeX
 # =============================================================================
-from constants import (EMPTY, WALL, MUD, SLIPPER, INVISIBLE, FREEZE_CELL,
+from constants import (EMPTY, WALL,
                        GRID_ROWS, GRID_COLS)
 
 
 import random
 
 def is_ghost_house(r, c):
-    """Returns True if (r, c) is within the central 5x5 ghost house area."""
-    return 8 <= r <= 12 and 8 <= c <= 12
+    """Returns True if (r, c) is within the central ghost house area (including moat)."""
+    return 7 <= r <= 11 and 6 <= c <= 14
 
 def generate_level_grid(level_idx: int):
     """
@@ -43,21 +43,22 @@ def generate_level_grid(level_idx: int):
         else:
             stack.pop()
 
-    # 2. Build the Ghost House (Center 5x5)
-    for r in range(8, 13):
-        for c in range(8, 13):
+    # 2. Build the Ghost House Moat
+    for r in range(7, 12):
+        for c in range(6, 15):
             g[r][c] = EMPTY
+            
+    # Ghost House Walls (1-thick)
+    for r in range(8, 11):
+        for c in range(7, 14):
+            g[r][c] = WALL
     
+    # Interior (5x1)
     for c in range(8, 13):
-        g[8][c] = WALL
-        g[12][c] = WALL
-    for r in range(8, 13):
-        g[r][8] = WALL
-        g[r][12] = WALL
+        g[9][c] = EMPTY
     
     # Ghost house exit
-    g[12][10] = EMPTY
-    g[13][10] = EMPTY  # Ensure the exit connects to the grid
+    g[10][10] = EMPTY
 
     # 3. Add loops (knock down random walls)
     # Lower levels have more loops (easier). Higher levels have fewer loops (harder).
@@ -89,11 +90,11 @@ PLAYER_STARTS = [
     (1, 1),
 ]
 
-# Monster spawn positions (row, col) — inside ghost house interior (rows 9-11, cols 9-11)
+# Monster spawn positions (row, col) — 2 on left, 2 on right
 MONSTER_STARTS = [
-    [(9, 9), (9, 11), (11, 9), (11, 11)],
-    [(9, 9), (9, 11), (11, 9), (11, 11)],
-    [(9, 9), (9, 11), (11, 9), (11, 11)],
-    [(9, 9), (9, 11), (11, 9), (11, 11)],
-    [(9, 9), (9, 11), (11, 9), (11, 11)],
+    [(9, 8), (9, 9), (9, 11), (9, 12)],
+    [(9, 8), (9, 9), (9, 11), (9, 12)],
+    [(9, 8), (9, 9), (9, 11), (9, 12)],
+    [(9, 8), (9, 9), (9, 11), (9, 12)],
+    [(9, 8), (9, 9), (9, 11), (9, 12)],
 ]

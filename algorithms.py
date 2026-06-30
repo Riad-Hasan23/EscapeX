@@ -4,7 +4,7 @@
 import random
 import heapq
 from collections import deque
-from constants import (WALL, MUD, SLIPPER, INVISIBLE, FREEZE_CELL,
+from constants import (WALL, TAR, SPEED, STEALTH, FROST, FIRE,
                        GRID_ROWS, GRID_COLS,
                        ALGO_RANDOM, ALGO_DFS, ALGO_BFS,
                        ALGO_BACKTRACK, ALGO_DIJKSTRA, ALGO_ASTAR)
@@ -23,7 +23,7 @@ def get_passable_neighbours(pos, grid):
 
 
 # ── Obstacle cost map for weighted algorithms ─────────────────────────────────
-_COST = {WALL: 999, MUD: 4, FREEZE_CELL: 5, SLIPPER: 1}
+_COST = {WALL: 999, TAR: 4, FROST: 5, SPEED: 1, FIRE: 1}
 
 def cell_cost(grid, r, c):
     return _COST.get(grid[r][c], 1)
